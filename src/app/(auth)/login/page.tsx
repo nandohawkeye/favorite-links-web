@@ -1,5 +1,6 @@
 'use client';
 
+import Cookies from 'js-cookie';
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -23,7 +24,7 @@ export default function LoginPage() {
         email,
         password,
       });
-      localStorage.setItem('token', token);
+      Cookies.set('token', token, { expires: 7 });
       router.push('/');
     } catch (err: unknown) {
       if (err instanceof Error) {

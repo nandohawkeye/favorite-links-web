@@ -1,7 +1,9 @@
+import Cookies from 'js-cookie';
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const token = localStorage.getItem('token');
+  const token = Cookies.get('token');
 
   const res = await fetch(`${API_URL}${path}`, {
     ...options,

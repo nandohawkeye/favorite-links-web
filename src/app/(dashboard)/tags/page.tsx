@@ -2,20 +2,20 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { Link } from '@/types';
-import LinkModal from '@/components/LinkModal';
+import { Tag } from '@/types';
+import TagModal from '@/components/TagModal';
 
-export default function DashboardPage() {
-  const [links, setLinks] = useState<Link[]>([]);
+export default function TagsPage() {
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
-  const [editingLink, setEditingLink] = useState<Link | undefined>();
+  const [editingTag, setEditingTag] = useState<Tag | undefined>();
 
-  async function fetchLinks() {
+  async function fetchTags() {
     try {
-      const data = await api.get<Link[]>('/links');
-      setLinks(data);
+      const data = await api.get<Tag[]>('/tags');
+      setTags(data);
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -26,13 +26,13 @@ export default function DashboardPage() {
   }
 
   useEffect(() => {
-    fetchLinks();
+    fetchTags();
   }, []);
 
   async function handleDelete(id: string) {
     try {
-      await api.delete(`/links/${id}`);
-      setLinks((prev) => prev.filter((l) => l.id !== id));
+      await api.delete(`/tags/${id}`);
+      setTags((prev) => prev.filter((t) => t.id !== id));
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
@@ -40,19 +40,19 @@ export default function DashboardPage() {
     }
   }
 
-  function handleEdit(link: Link) {
-    setEditingLink(link);
+  function handleEdit(tag: Tag) {
+    setEditingTag(tag);
     setShowModal(true);
   }
 
   function handleCloseModal() {
     setShowModal(false);
-    setEditingLink(undefined);
+    setEditingTag(undefined);
   }
 
   function handleSave() {
     handleCloseModal();
-    fetchLinks();
+    fetchTags();
   }
 
   if (loading) {
@@ -74,61 +74,48 @@ export default function DashboardPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-700">Meus links</h2>
+        <h2 className="text-lg font-semibold text-gray-700">Minhas tags</h2>
         <button
           onClick={() => setShowModal(true)}
           className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-4 py-2 rounded-lg transition-colors"
         >
-          + Adicionar link
+          + Nova tag
         </button>
       </div>
 
-      {links.length === 0 ? (
+      {tags.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-gray-400 text-lg">Nenhum link salvo ainda</p>
-          <p className="text-gray-300 text-sm mt-1">
-            Adicione seu primeiro link
-          </p>
+          <p className="text-gray-400 text-lg">Nenhuma tag criada ainda</p>
+          <p className="text-gray-300 text-sm mt-1">Crie sua primeira tag</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {links.map((link) => (
+          {tags.map((tag) => (
             <div
-              key={link.id}
+              key={tag.id}
               className="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between"
             >
-              <div>
-                <a
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline font-medium"
-                >
-                  {link.title ?? link.url}
-                </a>
-                <p className="text-sm text-gray-400 mt-0.5">{link.url}</p>
-                {link.tags.length > 0 && (
-                  <div className="flex gap-2 mt-2">
-                    {link.tags.map((tag) => (
-                      <span
-                        key={tag.id}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
-                      >
-                        {tag.name}
-                      </span>
-                    ))}
-                  </div>
+              <div className="flex items-center gap-3">
+                {tag.color && (
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: tag.color }}
+                  />
                 )}
+                {tag.icon && (
+                  <span>{String.fromCodePoint(parseInt(tag.icon, 16))}</span>
+                )}
+                <span className="font-medium text-gray-700">{tag.name}</span>
               </div>
-              <div className="flex gap-2 ml-4">
+              <div className="flex gap-2">
                 <button
-                  onClick={() => handleEdit(link)}
+                  onClick={() => handleEdit(tag)}
                   className="text-sm text-gray-400 hover:text-blue-600 transition-colors"
                 >
                   Editar
                 </button>
                 <button
-                  onClick={() => handleDelete(link.id)}
+                  onClick={() => handleDelete(tag.id)}
                   className="text-sm text-gray-400 hover:text-red-500 transition-colors"
                 >
                   Excluir
@@ -140,8 +127,8 @@ export default function DashboardPage() {
       )}
 
       {showModal && (
-        <LinkModal
-          link={editingLink}
+        <TagModal
+          tag={editingTag}
           onClose={handleCloseModal}
           onSave={handleSave}
         />
