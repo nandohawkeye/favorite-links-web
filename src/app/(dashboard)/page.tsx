@@ -2,31 +2,42 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
-import { Link } from '@/types';
+import { Link, Tag } from '@/types';
 import LinkModal from '@/components/LinkModal';
 
 export default function DashboardPage() {
   const [links, setLinks] = useState<Link[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [editingLink, setEditingLink] = useState<Link | undefined>();
+  const [search, setSearch] = useState('');
+  const [selectedTag, setSelectedTag] = useState<string>('');
 
   async function fetchLinks() {
     try {
       const data = await api.get<Link[]>('/links');
       setLinks(data);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+      if (err instanceof Error) setError(err.message);
     } finally {
       setLoading(false);
     }
   }
 
+  async function fetchTags() {
+    try {
+      const data = await api.get<Tag[]>('/tags');
+      setTags(data);
+    } catch {
+      // ignora erro de tags
+    }
+  }
+
   useEffect(() => {
     fetchLinks();
+    fetchTags();
   }, []);
 
   async function handleDelete(id: string) {
@@ -34,9 +45,7 @@ export default function DashboardPage() {
       await api.delete(`/links/${id}`);
       setLinks((prev) => prev.filter((l) => l.id !== id));
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      }
+      if (err instanceof Error) setError(err.message);
     }
   }
 
@@ -54,6 +63,18 @@ export default function DashboardPage() {
     handleCloseModal();
     fetchLinks();
   }
+
+  const filteredLinks = links.filter((link) => {
+    const matchesSearch =
+      search === '' ||
+      link.url.toLowerCase().includes(search.toLowerCase()) ||
+      (link.title?.toLowerCase().includes(search.toLowerCase()) ?? false);
+
+    const matchesTag =
+      selectedTag === '' || link.tags.some((t) => t.id === selectedTag);
+
+    return matchesSearch && matchesTag;
+  });
 
   if (loading) {
     return (
@@ -73,7 +94,7 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-4">
         <h2 className="text-lg font-semibold text-gray-700">Meus links</h2>
         <button
           onClick={() => setShowModal(true)}
@@ -83,16 +104,40 @@ export default function DashboardPage() {
         </button>
       </div>
 
-      {links.length === 0 ? (
+      <div className="flex gap-3 mb-6">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Buscar por título ou URL..."
+          className="flex-1 border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <select
+          value={selectedTag}
+          onChange={(e) => setSelectedTag(e.target.value)}
+          className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value="">Todas as tags</option>
+          {tags.map((tag) => (
+            <option key={tag.id} value={tag.id}>
+              {tag.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {filteredLinks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <p className="text-gray-400 text-lg">Nenhum link salvo ainda</p>
+          <p className="text-gray-400 text-lg">Nenhum link encontrado</p>
           <p className="text-gray-300 text-sm mt-1">
-            Adicione seu primeiro link
+            {links.length === 0
+              ? 'Adicione seu primeiro link'
+              : 'Tente outros filtros'}
           </p>
         </div>
       ) : (
         <div className="space-y-3">
-          {links.map((link) => (
+          {filteredLinks.map((link) => (
             <div
               key={link.id}
               className="bg-white rounded-xl border border-gray-200 px-5 py-4 flex items-center justify-between"
@@ -112,7 +157,11 @@ export default function DashboardPage() {
                     {link.tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full"
+                        className="text-xs px-2 py-0.5 rounded-full"
+                        style={{
+                          backgroundColor: tag.color ?? '#e5e7eb',
+                          color: tag.color ? '#fff' : '#4b5563',
+                        }}
                       >
                         {tag.name}
                       </span>
