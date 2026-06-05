@@ -157,7 +157,7 @@ export default function DashboardPage() {
                     {link.tags.map((tag) => (
                       <span
                         key={tag.id}
-                        className="text-xs px-2 py-0.5 rounded-full"
+                        className="text-xs px-2 py-0.5 rounded"
                         style={{
                           backgroundColor: tag.color ?? '#e5e7eb',
                           color: tag.color ? '#fff' : '#4b5563',

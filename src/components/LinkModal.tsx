@@ -115,7 +115,7 @@ export default function LinkModal({ link, onClose, onSave }: Props) {
                     key={tag.id}
                     type="button"
                     onClick={() => toggleTag(tag.id)}
-                    className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                    className={`text-xs px-3 py-1 rounded border transition-colors ${
                       selectedTagIds.includes(tag.id)
                         ? 'bg-blue-600 text-white border-blue-600'
                         : 'bg-white text-gray-600 border-gray-300'
