@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Favorite Links Web
 
-## Getting Started
+Frontend do projeto Favorite Links — uma aplicação para organizar links pessoais com tags e categorias.
 
-First, run the development server:
+## 🔗 Links
+
+- **Documentação da API:** https://favorite-links.onrender.com/docs
+- **Repositório da API:** https://github.com/nandohawkeye/favorite_links_api
+
+## 🛠️ Stack
+
+- Next.js 16 + TypeScript
+- Tailwind CSS v4
+- Jest + React Testing Library
+- js-cookie
+
+## ✨ Funcionalidades
+
+- Autenticação com JWT (login e cadastro)
+- Proteção de rotas via proxy (middleware do Next.js 16)
+- Listagem de links com busca por título e URL
+- Filtro de links por tag
+- Criação, edição e exclusão de links
+- Gerenciamento de tags com cor (hex) e ícone (unicode)
+- Feedback visual de loading e erros
+
+## 📦 Instalação
+
+```bash
+git clone https://github.com/nandohawkeye/favorite-linkk-web
+cd favorite-linkk-web
+npm install
+```
+
+Inicie o servidor de desenvolvimento:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse `http://localhost:3001` no navegador.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🧪 Testes
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm test
+```
 
-## Learn More
+Cobertura de testes com Jest + React Testing Library:
 
-To learn more about Next.js, take a look at the following resources:
+- `LoginPage` — renderização, erro de credenciais, chamada da API
+- `RegisterPage` — renderização, email duplicado, chamada da API
+- `LinkModal` — criação, edição, erro, cancelamento
+- `TagModal` — criação, edição, erro, cancelamento
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📋 Estrutura do projeto
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/
+│   ├── (auth)/
+│   │   ├── login/
+│   │   │   └── page.tsx
+│   │   ├── register/
+│   │   │   └── page.tsx
+│   │   └── layout.tsx
+│   └── (dashboard)/
+│       ├── tags/
+│       │   └── page.tsx
+│       ├── layout.tsx
+│       └── page.tsx
+├── components/
+│   ├── LinkModal.tsx
+│   └── TagModal.tsx
+├── lib/
+│   └── api.ts
+├── types/
+│   └── index.ts
+├── __tests__/
+│   ├── LoginPage.test.tsx
+│   ├── RegisterPage.test.tsx
+│   ├── LinkModal.test.tsx
+│   └── TagModal.test.tsx
+└── proxy.ts
+```
 
-## Deploy on Vercel
+## 🔐 Autenticação
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+O token JWT é armazenado em cookie via `js-cookie` e validado pelo `proxy.ts` do Next.js 16 a cada requisição. Rotas protegidas redirecionam automaticamente para `/login` quando o usuário não está autenticado. Rotas de autenticação redirecionam para `/` quando o usuário já está logado.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🚀 Deploy
+
+O projeto está deployado no [Render](https://render.com) como um serviço Node.js.
